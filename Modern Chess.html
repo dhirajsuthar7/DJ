@@ -1,0 +1,2708 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhiraj Games - Mobile Optimized</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- General Styling & Font --- */
+        :root {
+            /* Portal & Game Shared Variables */
+            --shadow: rgba(0, 0, 0, 0.1);
+
+            /* Portal Specific Variables */
+            --portal-text-color: #f0f0f0;
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --border-color: rgba(255, 255, 255, 0.2);
+
+            /* Sudoku Game Specific Variables */
+            --sudoku-primary: #4a6fa5;
+            --sudoku-primary-dark: #2a4f7f;
+            --sudoku-secondary: #ff6b6b;
+            --sudoku-accent: #4fc3f7;
+            --sudoku-text: #333;
+            --sudoku-text-light: #777;
+            --sudoku-bg: #f5f7fa;
+            --sudoku-grid-bg: #ffffff;
+            --sudoku-fixed-cell: #e0e7ff;
+            --sudoku-selected: #d1e7ff;
+            --sudoku-highlight: #e3f2fd;
+            --sudoku-error: #ffcdd2;
+            --sudoku-success: #c8e6c9;
+            --sudoku-game-border: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            touch-action: manipulation;
+        }
+
+        /* --- Continuously Changing Animated Background (For all views) --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: animated-gradient 15s ease infinite;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        @keyframes animated-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* --- General Helper Class --- */
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- PORTAL STYLES --- */
+        .portal-container {
+            width: 90%;
+            max-width: 600px;
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--portal-text-color);
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px 0 var(--shadow-color);
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        .portal-container h1 { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            margin-bottom: 15px; 
+            text-shadow: 0 0 15px rgba(0, 0, 0, 0.3); 
+        }
+        
+        .portal-container .portal-description { 
+            font-size: 1.1rem; 
+            line-height: 1.6; 
+            margin-bottom: 30px; 
+            opacity: 0.9; 
+        }
+        
+        .portal-container .button-container { 
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .portal-container .game-button {
+            padding: 16px 20px;
+            font-size: 1.1rem;
+            font-weight: 600; 
+            letter-spacing: 1px; 
+            color: var(--portal-text-color);
+            background: var(--glass-bg); 
+            border: 1px solid var(--border-color); 
+            border-radius: 15px;
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .portal-container .game-button:hover { 
+            background: rgba(255, 255, 255, 0.2); 
+            transform: translateY(-3px) scale(1.02); 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3); 
+        }
+        
+        /* --- Styles for Coming Soon Buttons --- */
+        .portal-container .game-button.coming-soon-btn {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .portal-container .game-button.coming-soon-btn:hover {
+            /* Override hover effects to show they are inactive */
+            background: var(--glass-bg); /* Reset to original background */
+            transform: none; 
+            box-shadow: none;
+        }
+        
+        .portal-container .social-links {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+        
+        .portal-container .social-links a {
+            color: var(--portal-text-color);
+            font-size: 2rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .portal-container .social-links a:hover {
+            opacity: 1;
+            transform: scale(1.15) rotate(5deg);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- Back to Portal Button --- */
+        .back-to-portal-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .back-to-portal-btn:hover {
+            background: rgba(0, 0, 0, 0.5);
+            transform: scale(1.1);
+        }
+
+        /* --- SUDOKU GAME 1 STYLES --- */
+        #sudoku-game-view {
+            width: 100%; 
+            max-width: 500px; 
+            background: white; 
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow); 
+            overflow: hidden; 
+            color: var(--sudoku-text);
+            animation: fadeIn 0.5s ease-out forwards;
+            position: relative;
+            padding: 10px 0;
+        }
+        
+        #sudoku-game-view header { 
+            background: var(--sudoku-primary); 
+            color: white; 
+            padding: 15px; 
+            text-align: center; 
+        }
+        
+        #sudoku-game-view h1 { 
+            font-size: 1.6rem; 
+            font-weight: 600; 
+            margin-bottom: 5px; 
+        }
+        
+        #sudoku-game-view .subtitle { 
+            font-size: 0.8rem; 
+            opacity: 0.9; 
+        }
+        
+        #sudoku-game-view .game-stats { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 15px; 
+            background: var(--sudoku-bg); 
+            border-bottom: 1px solid var(--sudoku-game-border); 
+            font-size: 0.9rem;
+        }
+        
+        #sudoku-game-view .stat { 
+            text-align: center; 
+            font-size: 0.8rem; 
+        }
+        
+        #sudoku-game-view .stat-value { 
+            font-weight: 700; 
+            font-size: 1rem; 
+            color: var(--sudoku-primary); 
+        }
+        
+        #sudoku-game-view .game-area { 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        
+        #sudoku-game-view .sudoku-grid {
+            display: grid; 
+            grid-template-columns: repeat(9, 1fr); 
+            gap: 1px;
+            background: #aab8c2; 
+            border: 2px solid #aab8c2; 
+            border-radius: 8px;
+            overflow: hidden; 
+            margin-bottom: 20px; 
+            width: 100%; 
+            max-width: 95vw;
+            aspect-ratio: 1/1;
+        }
+        
+        #sudoku-game-view .cell {
+            background: var(--sudoku-grid-bg); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 1.3rem; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            user-select: none; 
+            aspect-ratio: 1/1;
+        }
+        
+        #sudoku-game-view .cell.border-right { 
+            border-right: 2px solid #aab8c2; 
+        }
+        
+        #sudoku-game-view .cell.border-bottom { 
+            border-bottom: 2px solid #aab8c2; 
+        }
+        
+        #sudoku-game-view .cell.fixed { 
+            background: var(--sudoku-fixed-cell); 
+            font-weight: 700; 
+            color: var(--sudoku-primary); 
+            cursor: default; 
+        }
+        
+        #sudoku-game-view .cell.selected { 
+            background: var(--sudoku-selected); 
+            outline: 2px solid var(--sudoku-primary); 
+            z-index: 10; 
+        }
+        
+        #sudoku-game-view .cell.highlighted { 
+            background: var(--sudoku-highlight); 
+        }
+        
+        #sudoku-game-view .cell.error { 
+            background: var(--sudoku-error); 
+            color: #c62828; 
+            animation: shake 0.4s; 
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); } 
+            20%, 60% { transform: translateX(-4px); } 
+            40%, 80% { transform: translateX(4px); }
+        }
+        
+        #sudoku-game-view .controls { 
+            display: flex; 
+            gap: 10px; 
+            margin-bottom: 20px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            width: 100%;
+        }
+        
+        #sudoku-game-view .btn {
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 50px; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 6px var(--shadow);
+            font-size: 0.9rem;
+        }
+        
+        #sudoku-game-view .btn:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 2px 4px var(--shadow); 
+        }
+        
+        #sudoku-game-view .btn-primary { 
+            background: var(--sudoku-primary); 
+            color: white; 
+        }
+        
+        #sudoku-game-view .btn-primary:hover { 
+            background: var(--sudoku-primary-dark); 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 8px var(--shadow); 
+        }
+        
+        #sudoku-game-view .btn-secondary { 
+            background: var(--sudoku-secondary); 
+            color: white; 
+        }
+        
+        #sudoku-game-view .btn-secondary:hover { 
+            opacity: 0.9; 
+            transform: translateY(-2px); 
+            box-shadow: 0 6px 8px var(--shadow); 
+        }
+        
+        #sudoku-game-view .number-pad { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+            width: 100%; 
+            max-width: 300px; 
+        }
+        
+        #sudoku-game-view .num-btn {
+            padding: 12px; 
+            border: 2px solid var(--sudoku-game-border); 
+            border-radius: 10px; 
+            background: white;
+            font-size: 1.1rem; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            min-height: 50px;
+        }
+        
+        #sudoku-game-view .num-btn:hover { 
+            background: var(--sudoku-highlight); 
+            transform: translateY(-2px); 
+        }
+        
+        #sudoku-game-view .num-btn:active { 
+            transform: translateY(1px); 
+        }
+        
+        #sudoku-game-view .num-btn.clear { 
+            grid-column: span 3; 
+            background: var(--sudoku-accent); 
+            color: white; 
+            border-color: var(--sudoku-accent); 
+        }
+        
+        #sudoku-game-view footer { 
+            text-align: center; 
+            padding: 12px; 
+            font-size: 0.8rem; 
+            color: var(--sudoku-text-light); 
+            background: var(--sudoku-bg); 
+            border-top: 1px solid var(--sudoku-game-border); 
+        }
+        
+        .message {
+            position: fixed; 
+            top: -100px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            padding: 12px 25px;
+            border-radius: 10px; 
+            font-weight: 600; 
+            box-shadow: 0 5px 15px var(--shadow); 
+            z-index: 1000;
+            opacity: 0; 
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            max-width: 90%;
+            text-align: center;
+        }
+        
+        .message.show { 
+            opacity: 1; 
+            top: 20px; 
+        }
+        
+        .message.success { 
+            background: var(--sudoku-success); 
+            color: #2e7d32; 
+        }
+        
+        .message.error { 
+            background: var(--sudoku-error); 
+            color: #c62828; 
+        }
+        
+        /* --- MATH CHALLENGE GAME STYLES --- */
+        #math-game-view .container {
+            width: 100%; 
+            max-width: 800px; 
+            background: rgba(255, 255, 255, 0.92); 
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); 
+            overflow: hidden; 
+            position: relative; 
+            margin: auto 0;
+        }
+        
+        #math-game-view .game-header { 
+            background: linear-gradient(90deg, #ff6b6b, #ff8e53); 
+            padding: 20px 25px; 
+            text-align: center; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        #math-game-view .game-header h1 { 
+            color: white; 
+            font-size: 2rem; 
+            margin-bottom: 10px; 
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
+            position: relative; 
+            z-index: 2; 
+        }
+        
+        #math-game-view .content { 
+            padding: 20px; 
+        }
+        
+        #math-game-view .screen { 
+            display: none; 
+            animation: fadeIn 0.5s ease; 
+        }
+        
+        #math-game-view .active { 
+            display: block; 
+        }
+        
+        #math-game-view .level-selector, 
+        #math-game-view .time-selector { 
+            margin-bottom: 20px; 
+        }
+        
+        #math-game-view .selector-title { 
+            font-size: 1.3rem; 
+            color: #2c3e50; 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        
+        #math-game-view .selector-title i { 
+            margin-right: 8px; 
+            color: #e74c3c; 
+        }
+        
+        #math-game-view .options { 
+            display: flex; 
+            flex-direction: column;
+            gap: 12px; 
+        }
+        
+        #math-game-view .option {
+            flex: 1; 
+            padding: 18px 10px; 
+            text-align: center; 
+            background: #f8f9fa; 
+            border: 2px solid #dee2e6;
+            border-radius: 15px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            font-weight: bold; 
+            color: #495057;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+        }
+        
+        #math-game-view .option:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); 
+        }
+        
+        #math-game-view .option.selected { 
+            background: linear-gradient(135deg, #3498db, #8e44ad); 
+            color: white; 
+            border-color: #8e44ad; 
+            transform: translateY(-5px); 
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); 
+        }
+        
+        #math-game-view .option i { 
+            font-size: 1.8rem; 
+            margin-bottom: 8px; 
+        }
+        
+        #math-game-view .game-controls { 
+            display: flex; 
+            justify-content: center; 
+            margin-top: 25px; 
+        }
+        
+        #math-game-view .btn {
+            padding: 14px 35px; 
+            font-size: 1.1rem; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            font-weight: bold; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #math-game-view .btn i { 
+            margin-right: 8px; 
+        }
+        
+        #math-game-view .btn-start { 
+            background: linear-gradient(135deg, #2ecc71, #1abc9c); 
+            color: white; 
+        }
+        
+        #math-game-view .btn-start:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 7px 20px rgba(46, 204, 113, 0.4); 
+        }
+        
+        #math-game-view .game-screen { 
+            text-align: center; 
+        }
+        
+        #math-game-view .game-info { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            background: #f8f9fa; 
+            padding: 12px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); 
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        #math-game-view .info-box { 
+            background: white; 
+            padding: 10px 15px; 
+            border-radius: 12px; 
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08); 
+            min-width: 100px;
+            flex: 1;
+        }
+        
+        #math-game-view .info-box h3 { 
+            font-size: 0.9rem; 
+            color: #7f8c8d; 
+            margin-bottom: 5px; 
+        }
+        
+        #math-game-view .info-box p { 
+            font-size: 1.4rem; 
+            font-weight: bold; 
+            color: #2c3e50; 
+        }
+        
+        #math-game-view .timer-bar { 
+            height: 16px; 
+            background: #ecf0f1; 
+            border-radius: 10px; 
+            margin-bottom: 25px; 
+            overflow: hidden; 
+            position: relative; 
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1); 
+        }
+        
+        #math-game-view .timer-progress { 
+            height: 100%; 
+            background: linear-gradient(90deg, #2ecc71, #f1c40f, #e74c3c); 
+            width: 100%; 
+            border-radius: 10px; 
+            transition: width 0.5s linear; 
+        }
+        
+        #math-game-view .question-box { 
+            background: linear-gradient(135deg, #3498db, #9b59b6); 
+            padding: 20px; 
+            border-radius: 20px; 
+            color: white; 
+            margin-bottom: 25px; 
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); 
+            position: relative; 
+            overflow: hidden; 
+        }
+        
+        #math-game-view .question { 
+            font-size: 2.5rem; 
+            font-weight: bold; 
+            margin: 15px 0; 
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
+            position: relative; 
+            z-index: 2; 
+        }
+        
+        #math-game-view .answer-input { 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 1.8rem; 
+            text-align: center; 
+            border: 3px solid #3498db; 
+            border-radius: 15px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
+            transition: all 0.3s ease; 
+        }
+        
+        #math-game-view .answer-input:focus { 
+            outline: none; 
+            border-color: #9b59b6; 
+            box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3); 
+        }
+        
+        #math-game-view .btn-submit { 
+            background: linear-gradient(135deg, #e74c3c, #e67e22); 
+            color: white; 
+            width: 100%; 
+            padding: 18px; 
+            font-size: 1.3rem; 
+        }
+        
+        #math-game-view .btn-submit:hover { 
+            transform: scale(1.02); 
+            box-shadow: 0 7px 20px rgba(231, 76, 60, 0.4); 
+        }
+        
+        #math-game-view .result-screen { 
+            text-align: center; 
+            padding: 20px;
+        }
+        
+        #math-game-view .score-display { 
+            font-size: 4.5rem; 
+            font-weight: bold; 
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            margin: 25px 0; 
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); 
+        }
+        
+        #math-game-view .message { 
+            font-size: 1.8rem; 
+            color: #2c3e50; 
+            margin-bottom: 25px; 
+        }
+        
+        #math-game-view .btn-restart { 
+            background: linear-gradient(135deg, #3498db, #2c3e50); 
+            color: white; 
+            margin-top: 20px; 
+        }
+        
+        #math-game-view .btn-restart:hover { 
+            transform: scale(1.05); 
+            box-shadow: 0 7px 20px rgba(52, 152, 219, 0.4); 
+        }
+        
+        /* --- AGE CALCULATOR STYLES --- */
+        #age-calculator-view {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative; 
+            overflow: hidden;
+            padding: 15px;
+        }
+        
+        #age-calculator-view .calculator-container {
+            background-color: rgba(255, 255, 255, 0.98);
+            padding: 30px 20px;
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transform: scale(1);
+            transition: transform 0.5s ease;
+        }
+        
+        #age-calculator-view h1 {
+            color: #333;
+            background: linear-gradient(45deg, #e73c7e, #23a6d5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+            font-weight: 700;
+        }
+        
+        #age-calculator-view .input-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+        
+        #age-calculator-view .input-container input[type="date"] {
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 280px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        #age-calculator-view .input-container input[type="date"]:focus {
+            outline: none;
+            border-color: #23a6d5;
+            box-shadow: 0 0 10px rgba(35, 166, 213, 0.5);
+        }
+        
+        #age-calculator-view button#calculateBtn {
+            background: linear-gradient(45deg, #23a6d5, #23d5ab);
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(35, 166, 213, 0.4);
+            animation: pulseButton 2s infinite;
+        }
+        
+        @keyframes pulseButton {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        #age-calculator-view button#calculateBtn:hover {
+            animation-play-state: paused;
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(35, 166, 213, 0.6);
+        }
+        
+        #age-calculator-view .result-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+            gap: 25px;
+        }
+        
+        #age-calculator-view .result-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            animation: popIn 0.6s ease-out forwards;
+            width: 100%;
+        }
+        
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        #age-calculator-view .result-box span {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #ee7752, #e73c7e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        #age-calculator-view .result-box p {
+            font-size: 1rem;
+            color: #555;
+            margin-top: -5px;
+        }
+        
+        /* --- CALCULATOR GAME STYLES --- */
+        #calculator-view {
+            position: relative;
+            animation: pop-in-calc 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            width: 100%;
+            max-width: 380px;
+            padding: 15px;
+        }
+        
+        @keyframes pop-in-calc {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        #calculator-view .calculator {
+            padding: 20px;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+        
+        #calculator-view .display {
+            width: 100%; 
+            height: 70px; 
+            background: transparent; 
+            border: none;
+            outline: none; 
+            color: #fff; 
+            font-size: 2.2em; 
+            text-align: right;
+            padding: 10px 15px; 
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            animation: text-fade-in 0.5s ease;
+        }
+        
+        @keyframes text-fade-in {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        #calculator-view .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        #calculator-view button {
+            width: 100%; 
+            height: 65px; 
+            border: none; 
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.15); 
+            color: #fff;
+            font-size: 1.4em; 
+            font-weight: 500; 
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        #calculator-view button:hover {
+            transform: translateY(-5px) scale(1.05);
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        #calculator-view button:active {
+            transform: translateY(0) scale(0.95);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+        
+        #calculator-view .operator { 
+            background-color: rgba(255, 165, 0, 0.5); 
+        }
+        
+        #calculator-view .operator:hover { 
+            background-color: rgba(255, 165, 0, 0.7); 
+        }
+        
+        #calculator-view .clear { 
+            background-color: rgba(255, 70, 70, 0.5); 
+        }
+        
+        #calculator-view .clear:hover { 
+            background-color: rgba(255, 70, 70, 0.7); 
+        }
+        
+        #calculator-view .equal {
+            grid-column: span 2;
+            background-color: rgba(0, 200, 83, 0.6);
+            animation: pulse-equal 2s infinite;
+        }
+        
+        #calculator-view .equal:hover {
+            background-color: rgba(0, 200, 83, 0.8);
+            animation-play-state: paused;
+        }
+        
+        @keyframes pulse-equal {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7); }
+            70% { transform: scale(1.02); box-shadow: 0 0 10px 15px rgba(0, 200, 83, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
+        }
+
+        /* --- CHESS GAME STYLES --- */
+        #chess-game-view {
+            --chess-primary: #3498db;
+            --chess-secondary: #2c3e50;
+            --chess-accent: #e74c3c;
+            --chess-light: #ecf0f1;
+            --chess-dark: #2c3e50;
+            --chess-light-square: #f0d9b5;
+            --chess-dark-square: #b58863;
+            --chess-highlight: rgba(46, 204, 113, 0.5);
+            --chess-move-indicator: rgba(46, 204, 113, 0.3);
+            --chess-check-highlight: rgba(231, 76, 60, 0.5);
+            --chess-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            color: var(--chess-light);
+        }
+
+        #chess-game-view .container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+        }
+
+        @media (max-width: 900px) {
+            #chess-game-view .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        #chess-game-view .game-header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 20px;
+            animation: fadeIn 1s ease;
+        }
+
+        #chess-game-view h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #3498db, #2ecc71);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #chess-game-view .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        #chess-game-view .chess-container {
+            background: rgba(44, 62, 80, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--chess-shadow);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: slideIn 0.8s ease;
+        }
+
+        #chess-game-view .board-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        #chess-game-view .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            aspect-ratio: 1/1;
+            width: 100%;
+            border: 4px solid var(--chess-dark);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        #chess-game-view .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-size: 2.5rem; /* Will be adjusted by media queries */
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        #chess-game-view .square.light {
+            background-color: var(--chess-light-square);
+        }
+
+        #chess-game-view .square.dark {
+            background-color: var(--chess-dark-square);
+        }
+
+        #chess-game-view .square.highlighted {
+            background-color: var(--chess-highlight);
+            box-shadow: inset 0 0 15px rgba(46, 204, 113, 0.8);
+        }
+        
+        #chess-game-view .square.in-check {
+            background-image: radial-gradient(circle, var(--chess-check-highlight) 20%, transparent 70%);
+        }
+
+        #chess-game-view .square.possible-move::after {
+            content: '';
+            position: absolute;
+            width: 25%;
+            height: 25%;
+            border-radius: 50%;
+            background-color: var(--chess-move-indicator);
+            z-index: 1;
+        }
+
+        #chess-game-view .square.possible-capture {
+            position: relative;
+            box-shadow: inset 0 0 0 5px var(--chess-highlight);
+        }
+
+        #chess-game-view .piece {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease;
+            z-index: 2;
+            position: relative;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        #chess-game-view .piece.selected {
+            transform: scale(1.1);
+            text-shadow: 0 0 15px rgba(46, 204, 113, 0.8);
+        }
+        
+        #chess-game-view .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            animation: fadeIn 1.2s ease;
+        }
+
+        #chess-game-view .panel {
+            background: rgba(44, 62, 80, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--chess-shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        #chess-game-view .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--chess-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chess-game-view .panel-title i {
+            font-size: 1.8rem;
+        }
+
+        #chess-game-view .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        #chess-game-view .btn {
+            background: linear-gradient(to right, var(--chess-primary), #1abc9c);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #chess-game-view .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #chess-game-view .btn:active {
+            transform: translateY(0);
+        }
+        
+        #chess-game-view .btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #chess-game-view .btn.secondary {
+            background: linear-gradient(to right, var(--chess-secondary), #34495e);
+        }
+
+        #chess-game-view .btn.danger {
+            background: linear-gradient(to right, var(--chess-accent), #e67e22);
+        }
+
+        #chess-game-view .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+        }
+
+        #chess-game-view .player-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #chess-game-view .player-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: var(--chess-dark);
+        }
+
+        #chess-game-view .player-icon.white {
+            background: linear-gradient(to right, #ecf0f1, #bdc3c7);
+            color: #2c3e50;
+        }
+
+        #chess-game-view .player-icon.black {
+            background: linear-gradient(to right, #2c3e50, #34495e);
+            color: #ecf0f1;
+        }
+
+        #chess-game-view .status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: rgba(0, 0, 0, 0.3);
+            text-align: center;
+            min-width: 150px;
+        }
+
+        #chess-game-view .moves-container {
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        #chess-game-view .moves-container::-webkit-scrollbar { width: 8px; }
+        #chess-game-view .moves-container::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.1); border-radius: 10px; }
+        #chess-game-view .moves-container::-webkit-scrollbar-thumb { background: var(--chess-primary); border-radius: 10px; }
+
+        #chess-game-view .moves-list {
+            display: grid;
+            grid-template-columns: 25px 1fr 1fr;
+            gap: 10px;
+            counter-reset: move-counter;
+        }
+
+        #chess-game-view .move { display: contents; }
+
+        #chess-game-view .move span {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        #chess-game-view .move span:hover {
+            background: rgba(52, 152, 219, 0.2);
+            transform: translateX(5px);
+        }
+
+        #chess-game-view .move-number {
+            font-weight: bold;
+            color: var(--chess-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #chess-game-view .ai-thinking {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-top: 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            height: 57px;
+            width: 100%;
+        }
+
+        #chess-game-view .ai-thinking.visible { opacity: 1; }
+
+        #chess-game-view .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--chess-primary);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes slideIn { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- ALL VIEWS RESPONSIVE ADJUSTMENTS --- */
+
+        /* Tablet and desktop adjustments */
+        @media (min-width: 600px) {
+            .portal-container .button-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            #math-game-view .options {
+                flex-direction: row;
+            }
+            #age-calculator-view .result-container {
+                flex-direction: row;
+            }
+            #sudoku-game-view .number-pad {
+                grid-template-columns: repeat(5, 1fr);
+                max-width: 350px;
+            }
+            #sudoku-game-view .num-btn.clear {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #chess-game-view h1 { font-size: 2.2rem; }
+            #chess-game-view .subtitle { font-size: 1rem; }
+            #chess-game-view .controls { grid-template-columns: 1fr; }
+            #chess-game-view .moves-list { grid-template-columns: 25px 1fr; }
+            #chess-game-view .piece { font-size: 2rem; }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            .portal-container h1 {
+                font-size: 2rem;
+            }
+            .portal-container .portal-description {
+                font-size: 0.95rem;
+            }
+            .portal-container .game-button {
+                font-size: 1rem;
+                padding: 14px 15px;
+            }
+            #sudoku-game-view .sudoku-grid {
+                max-width: 100%;
+            }
+            #sudoku-game-view .cell {
+                font-size: 1.1rem;
+            }
+            #sudoku-game-view .btn {
+                padding: 10px 15px;
+                font-size: 0.85rem;
+            }
+            #math-game-view .game-header h1 {
+                font-size: 1.6rem;
+            }
+            #math-game-view .question {
+                font-size: 2rem;
+            }
+            #math-game-view .answer-input {
+                font-size: 1.5rem;
+                padding: 14px;
+            }
+            #calculator-view button {
+                height: 55px;
+                font-size: 1.2rem;
+            }
+            .back-to-portal-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5rem;
+                top: 12px;
+                left: 12px;
+            }
+            #chess-game-view .game-info { flex-direction: column; gap: 10px; align-items: center; }
+            #chess-game-view .square { font-size: 1.8rem; }
+            #chess-game-view .player-info, #chess-game-view .status { font-size: 0.9rem; }
+            #chess-game-view .status { min-width: auto; width: 100%;}
+        }
+
+        @media (max-width: 350px) {
+            /* Very small screens */
+            #sudoku-game-view .controls {
+                flex-direction: column;
+            }
+            #sudoku-game-view .btn {
+                width: 100%;
+            }
+            #math-game-view .info-box {
+                min-width: 80px;
+                padding: 8px 12px;
+            }
+            #math-game-view .info-box p {
+                font-size: 1.2rem;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    
+    <!-- This button is outside all views, but we'll show/hide it with JS -->
+    <button id="main-back-button" class="back-to-portal-btn hidden" title="Back to Main Menu">‹</button>
+
+    <!-- VIEW 1: THE PORTAL -->
+    <div id="portal-view" class="portal-container">
+        <h1>DHIRAJ GAMES</h1>
+        <p class="portal-description">
+            Welcome to the challenge portal. Choose a game below to begin your journey and test your skills.
+        </p>
+        <div class="button-container">
+            <button id="sudoku-btn" class="game-button"><i class="fas fa-th"></i> Sudoku Challenge</button>
+            <button id="math-challenge-btn" class="game-button"><i class="fas fa-calculator"></i> Math Challenge</button>
+            <button id="age-calculator-btn" class="game-button"><i class="fas fa-birthday-cake"></i> Age Calculator</button>
+            <button id="calculator-btn" class="game-button"><i class="fas fa-square-root-alt"></i> Calculator</button>
+            <button id="chess-btn" class="game-button"><i class="fas fa-chess"></i> Chess Game</button>
+            <button class="game-button coming-soon-btn"><i class="fas fa-hourglass-half"></i> Coming Soon</button>
+        </div>
+        <div class="social-links">
+            <a href="https://www.instagram.com/_dhiraj_suthar_/profilecard/?igsh=OXJnM3djdnI1ajMw" target="_blank" title="Instagram" rel="noopener noreferrer">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="mailto:suthardhiraj007mm@gmail.com" title="Email">
+                <i class="fas fa-envelope"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- VIEW 2: THE SUDOKU GAME (Initially hidden) -->
+    <div id="sudoku-game-view" class="hidden">
+        <header>
+            <h1>Modern Sudoku</h1>
+            <div class="subtitle">A clean, responsive puzzle experience</div>
+        </header>
+        <div class="game-stats">
+            <div class="stat"><div>Time</div><div class="stat-value" id="sudoku-timer">00:00</div></div>
+            <div class="stat"><div>Mistakes</div><div class="stat-value" id="sudoku-mistakes">0</div></div>
+            <div class="stat"><div>Difficulty</div><div class="stat-value">Medium</div></div>
+        </div>
+        <div class="game-area">
+            <div class="sudoku-grid" id="grid"></div>
+            <div class="controls">
+                <button class="btn btn-primary" id="new-game"><span>🔄</span> New Puzzle</button>
+                <button class="btn btn-secondary" id="check-solution"><span>✅</span> Check Solution</button>
+            </div>
+            <div class="number-pad">
+                <button class="num-btn" data-number="1">1</button>
+                <button class="num-btn" data-number="2">2</button>
+                <button class="num-btn" data-number="3">3</button>
+                <button class="num-btn" data-number="4">4</button>
+                <button class="num-btn" data-number="5">5</button>
+                <button class="num-btn" data-number="6">6</button>
+                <button class="num-btn" data-number="7">7</button>
+                <button class="num-btn" data-number="8">8</button>
+                <button class="num-btn" data-number="9">9</button>
+                <button class="num-btn clear" data-number="0">Clear</button>
+            </div>
+        </div>
+        <footer><p>Fill every row, column and 3x3 box with numbers 1-9</p></footer>
+    </div>
+    
+    <!-- VIEW 3: THE MATH CHALLENGE GAME (Initially hidden) -->
+    <div id="math-game-view" class="hidden">
+        <div class="container">
+            <div class="game-header">
+                <h1><i class="fas fa-calculator"></i> Math Challenge Adventure</h1>
+            </div>
+            <div class="content">
+                <!-- Start Screen -->
+                <div id="math-start-screen" class="screen active">
+                    <div class="level-selector">
+                        <h2 class="selector-title"><i class="fas fa-chart-line"></i> Select Difficulty Level</h2>
+                        <div class="options">
+                            <div class="option" data-level="easy"><i class="fas fa-seedling"></i><span>Easy</span></div>
+                            <div class="option" data-level="medium"><i class="fas fa-tree"></i><span>Medium</span></div>
+                            <div class="option" data-level="hard"><i class="fas fa-mountain"></i><span>Hard</span></div>
+                        </div>
+                    </div>
+                    <div class="time-selector">
+                        <h2 class="selector-title"><i class="fas fa-clock"></i> Select Time Per Question</h2>
+                        <div class="options">
+                            <div class="option" data-time="15"><i class="fas fa-turtle"></i><span>15 Seconds</span></div>
+                            <div class="option" data-time="20"><i class="fas fa-hippo"></i><span>20 Seconds</span></div>
+                            <div class="option" data-time="30"><i class="fas fa-horse"></i><span>30 Seconds</span></div>
+                        </div>
+                    </div>
+                    <div class="game-controls">
+                        <button id="math-start-btn" class="btn btn-start"><i class="fas fa-play"></i> Start Game</button>
+                    </div>
+                </div>
+                <!-- Game Screen -->
+                <div id="math-game-screen" class="screen">
+                    <div class="game-info">
+                        <div class="info-box"><h3>Level</h3><p id="math-current-level">Easy</p></div>
+                        <div class="info-box"><h3>Score</h3><p id="math-score">0</p></div>
+                        <div class="info-box"><h3>Question</h3><p id="math-question-count">1/10</p></div>
+                    </div>
+                    <div class="timer-bar"><div class="timer-progress" id="math-timer-progress"></div></div>
+                    <div class="question-box"><div class="question" id="math-question">5 + 3 = ?</div></div>
+                    <input type="number" class="answer-input" id="math-answer" placeholder="Enter your answer...">
+                    <button id="math-submit-btn" class="btn btn-submit"><i class="fas fa-paper-plane"></i> Submit Answer</button>
+                </div>
+                <!-- Result Screen -->
+                <div id="math-result-screen" class="screen">
+                    <h2 class="selector-title"><i class="fas fa-trophy"></i> Game Completed!</h2>
+                    <div class="score-display" id="math-final-score">8/10</div>
+                    <div class="message" id="math-result-message">Great job! You're a math wizard!</div>
+                    <div class="game-controls">
+                        <button id="math-restart-btn" class="btn btn-restart"><i class="fas fa-redo"></i> Play Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- VIEW 4: THE AGE CALCULATOR GAME (Initially hidden) -->
+    <div id="age-calculator-view" class="hidden">
+        <div class="calculator-container">
+            <h1>अपनी उम्र जानें</h1>
+            <div class="input-container">
+                <input type="date" id="birthdate">
+                <button id="calculateBtn">उम्र पता करें</button>
+            </div>
+            <div id="result" class="result-container">
+                <div class="result-box">
+                    <span id="years">0</span>
+                    <p>साल</p>
+                </div>
+                <div class="result-box">
+                    <span id="months">0</span>
+                    <p>महीने</p>
+                </div>
+                <div class="result-box">
+                    <span id="days">0</span>
+                    <p>दिन</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 5: THE ANIMATED CALCULATOR (Initially hidden) -->
+    <div id="calculator-view" class="hidden">
+        <div class="calculator">
+            <input type="text" class="display" readonly placeholder="0">
+            <div class="buttons">
+                <!-- Row 1 -->
+                <button class="clear" data-value="C">C</button>
+                <button class="operator" data-value="/">/</button>
+                <button class="operator" data-value="*">*</button>
+                <button data-value="DEL">DEL</button>
+                <!-- Row 2 -->
+                <button data-value="7">7</button>
+                <button data-value="8">8</button>
+                <button data-value="9">9</button>
+                <button class="operator" data-value="-">-</button>
+                <!-- Row 3 -->
+                <button data-value="4">4</button>
+                <button data-value="5">5</button>
+                <button data-value="6">6</button>
+                <button class="operator" data-value="+">+</button>
+                <!-- Row 4 -->
+                <button data-value="1">1</button>
+                <button data-value="2">2</button>
+                <button data-value="3">3</button>
+                <button data-value="." style="font-weight: bold;">.</button>
+                <!-- Row 5 -->
+                <button data-value="0">0</button>
+                <button class="equal" data-value="=">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 6: THE CHESS GAME (Initially hidden) -->
+    <div id="chess-game-view" class="hidden">
+        <div class="container">
+            <div class="game-header">
+                <h1>Modern Chess</h1>
+                <div class="subtitle">Play against our smarter AI opponent</div>
+            </div>
+    
+            <div class="chess-container">
+                <div class="board-container">
+                    <div class="chessboard" id="chessboard"></div>
+                </div>
+                
+                <div class="game-info">
+                    <div class="player-info">
+                        <div class="player-icon white">♔</div>
+                        <div>Player (White)</div>
+                    </div>
+                    
+                    <div class="status" id="game-status">Your turn</div>
+                    
+                    <div class="player-info">
+                        <div class="player-icon black">♚</div>
+                        <div>AI (Black)</div>
+                    </div>
+                </div>
+                
+                <div class="ai-thinking" id="ai-thinking">
+                    <div class="spinner"></div>
+                    <div>AI is thinking...</div>
+                </div>
+            </div>
+    
+            <div class="sidebar">
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-cogs"></i> Game Controls
+                    </div>
+                    <div class="controls">
+                        <button class="btn" id="chess-new-game">
+                            <i class="fas fa-redo"></i> New Game
+                        </button>
+                        <button class="btn secondary" id="chess-undo-move">
+                            <i class="fas fa-undo"></i> Undo
+                        </button>
+                        <button class="btn secondary" id="chess-flip-board">
+                            <i class="fas fa-retweet"></i> Flip Board
+                        </button>
+                        <button class="btn danger" id="chess-resign">
+                            <i class="fas fa-flag"></i> Resign
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">
+                        <i class="fas fa-scroll"></i> Move History
+                    </div>
+                    <div class="moves-container">
+                        <div class="moves-list" id="moves-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- This message element is outside the views to be accessible by some games -->
+    <div class="message" id="message"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- GLOBAL VIEW & NAVIGATION LOGIC ---
+            const portalView = document.getElementById('portal-view');
+            const sudokuGameView = document.getElementById('sudoku-game-view');
+            const mathGameView = document.getElementById('math-game-view');
+            const ageCalculatorView = document.getElementById('age-calculator-view');
+            const calculatorView = document.getElementById('calculator-view');
+            const chessGameView = document.getElementById('chess-game-view');
+            
+            const sudokuBtn = document.getElementById('sudoku-btn');
+            const mathChallengeBtn = document.getElementById('math-challenge-btn');
+            const ageCalculatorBtn = document.getElementById('age-calculator-btn');
+            const calculatorBtn = document.getElementById('calculator-btn');
+            const chessBtn = document.getElementById('chess-btn');
+            
+            const mainBackButton = document.getElementById('main-back-button');
+
+            let sudokuInitialized = false;
+            let mathGameInitialized = false;
+            let ageCalculatorInitialized = false;
+            let calculatorInitialized = false;
+            let chessInitialized = false;
+            
+            // Timers that might need to be cleared when switching views
+            let sudoku_timerInterval = null;
+            let math_timer = null;
+            let chess_aiTimeoutId = null;
+
+            function hideAllViewsAndButton() {
+                portalView.classList.add('hidden');
+                sudokuGameView.classList.add('hidden');
+                mathGameView.classList.add('hidden');
+                ageCalculatorView.classList.add('hidden');
+                calculatorView.classList.add('hidden');
+                chessGameView.classList.add('hidden');
+                mainBackButton.classList.add('hidden');
+            }
+            
+            function showGameView(viewElement) {
+                hideAllViewsAndButton();
+                viewElement.classList.remove('hidden');
+                mainBackButton.classList.remove('hidden');
+            }
+
+            sudokuBtn.addEventListener('click', () => {
+                showGameView(sudokuGameView);
+                if (!sudokuInitialized) {
+                    initSudokuGame();
+                    sudokuInitialized = true;
+                }
+            });
+            
+            mathChallengeBtn.addEventListener('click', () => {
+                showGameView(mathGameView);
+                if (!mathGameInitialized) {
+                    initMathGame();
+                    mathGameInitialized = true;
+                }
+            });
+            
+            ageCalculatorBtn.addEventListener('click', () => {
+                showGameView(ageCalculatorView);
+                if (!ageCalculatorInitialized) {
+                    initAgeCalculator();
+                    ageCalculatorInitialized = true;
+                }
+            });
+            
+            calculatorBtn.addEventListener('click', () => {
+                showGameView(calculatorView);
+                if (!calculatorInitialized) {
+                    initCalculator();
+                    calculatorInitialized = true;
+                }
+            });
+
+            chessBtn.addEventListener('click', () => {
+                showGameView(chessGameView);
+                if (!chessInitialized) {
+                    initChessGame();
+                    chessInitialized = true;
+                }
+            });
+
+            mainBackButton.addEventListener('click', () => {
+                hideAllViewsAndButton();
+                portalView.classList.remove('hidden');
+                // Stop any running timers to prevent errors/unwanted behavior
+                if (sudoku_timerInterval) clearInterval(sudoku_timerInterval);
+                if (math_timer) clearTimeout(math_timer);
+                if (chess_aiTimeoutId) clearTimeout(chess_aiTimeoutId);
+                math_resetGame(); // Reset math game state
+            });
+
+
+            // --- SUDOKU GAME LOGIC ---
+            function initSudokuGame() {
+                let sudoku_selectedCell = null, sudoku_mistakes = 0, sudoku_startTime = null, sudoku_solution = [], sudoku_board = [];
+                const gridElement = document.getElementById('grid');
+                const timerElement = document.getElementById('sudoku-timer');
+                const mistakesElement = document.getElementById('sudoku-mistakes');
+                const newGameBtn = document.getElementById('new-game');
+                const checkSolutionBtn = document.getElementById('check-solution');
+                const numberPad = document.querySelector('#sudoku-game-view .number-pad');
+                const messageElement = document.getElementById('message');
+
+                function createGrid() {
+                    gridElement.innerHTML = '';
+                    for (let i = 0; i < 81; i++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell'; cell.dataset.index = i;
+                        const row = Math.floor(i / 9), col = i % 9;
+                        cell.dataset.row = row; cell.dataset.col = col;
+                        cell.dataset.block = Math.floor(row / 3) * 3 + Math.floor(col / 3);
+                        if ((col + 1) % 3 === 0 && col < 8) cell.classList.add('border-right');
+                        if ((row + 1) % 3 === 0 && row < 8) cell.classList.add('border-bottom');
+                        gridElement.appendChild(cell);
+                    }
+                }
+                
+                function generateNewPuzzle() {
+                    resetGameState();
+                    sudoku_solution = generateSolvedBoard();
+                    sudoku_board = JSON.parse(JSON.stringify(sudoku_solution));
+                    removeNumbers(sudoku_board, 40);
+                    updateBoard();
+                    startTimer();
+                }
+                
+                function generateSolvedBoard() {
+                    const board = Array(9).fill().map(() => Array(9).fill(0));
+                    solveSudoku(board); return board;
+                }
+                
+                function solveSudoku(board) {
+                    for (let r = 0; r < 9; r++) { 
+                        for (let c = 0; c < 9; c++) {
+                            if (board[r][c] === 0) {
+                                const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9]; 
+                                shuffleArray(nums);
+                                for (const num of nums) {
+                                    if (isValid(board, r, c, num)) { 
+                                        board[r][c] = num; 
+                                        if (solveSudoku(board)) return true; 
+                                        board[r][c] = 0; 
+                                    }
+                                }
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                }
+                
+                function shuffleArray(array) { 
+                    for (let i = array.length - 1; i > 0; i--) { 
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]]; 
+                    } 
+                }
+                
+                function removeNumbers(board, count) {
+                    let removed = 0; 
+                    const cells = Array.from(Array(81).keys()); 
+                    shuffleArray(cells);
+                    for (const cellIndex of cells) {
+                        if (removed >= count) break;
+                        const r = Math.floor(cellIndex / 9), c = cellIndex % 9;
+                        if (board[r][c] !== 0) {
+                            const temp = board[r][c]; 
+                            board[r][c] = 0;
+                            if (countSolutions(JSON.parse(JSON.stringify(board))) !== 1) board[r][c] = temp;
+                            else removed++;
+                        }
+                    }
+                }
+                
+                function countSolutions(board) {
+                    let count = 0;
+                    function findUnassigned() { 
+                        for (let r = 0; r < 9; r++) 
+                            for (let c = 0; c < 9; c++) 
+                                if (board[r][c] === 0) return [r, c]; 
+                        return null; 
+                    }
+                    
+                    function solve() {
+                        if (count > 1) return;
+                        const unassigned = findUnassigned(); 
+                        if (!unassigned) { count++; return; }
+                        const [row, col] = unassigned;
+                        for (let num = 1; num <= 9; num++) { 
+                            if (isValid(board, row, col, num)) { 
+                                board[row][col] = num; 
+                                solve(); 
+                                board[row][col] = 0; 
+                            } 
+                        }
+                    }
+                    
+                    solve(); 
+                    return count;
+                }
+                
+                function isValid(board, row, col, num) {
+                    for (let x = 0; x < 9; x++) if (board[row][x] === num) return false;
+                    for (let x = 0; x < 9; x++) if (board[x][col] === num) return false;
+                    const boxRow = Math.floor(row / 3) * 3, boxCol = Math.floor(col / 3) * 3;
+                    for (let i = 0; i < 3; i++) 
+                        for (let j = 0; j < 3; j++) 
+                            if (board[boxRow + i][boxCol + j] === num) return false;
+                    return true;
+                }
+                
+                function updateBoard() {
+                    const cells = document.querySelectorAll('#sudoku-game-view .cell');
+                    cells.forEach((cell, index) => {
+                        const r = Math.floor(index / 9), c = index % 9;
+                        const value = sudoku_board[r][c];
+                        cell.textContent = value !== 0 ? value : '';
+                        cell.classList.toggle('fixed', value !== 0 && sudoku_solution[r][c] !== 0);
+                    });
+                }
+                
+                function resetGameState() {
+                    if (sudoku_timerInterval) clearInterval(sudoku_timerInterval);
+                    sudoku_selectedCell = null; 
+                    sudoku_mistakes = 0;
+                    mistakesElement.textContent = sudoku_mistakes; 
+                    timerElement.textContent = '00:00';
+                    document.querySelectorAll('#sudoku-game-view .cell.selected, #sudoku-game-view .cell.highlighted, #sudoku-game-view .cell.error').forEach(c => c.classList.remove('selected', 'highlighted', 'error'));
+                    messageElement.classList.remove('show');
+                }
+                
+                function startTimer() {
+                    if (sudoku_timerInterval) clearInterval(sudoku_timerInterval);
+                    sudoku_startTime = Date.now();
+                    sudoku_timerInterval = setInterval(updateTimer, 1000);
+                }
+                
+                function updateTimer() {
+                    const elapsed = Math.floor((Date.now() - sudoku_startTime) / 1000);
+                    const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                    const seconds = (elapsed % 60).toString().padStart(2, '0');
+                    timerElement.textContent = `${minutes}:${seconds}`;
+                }
+                
+                function setupEventListeners() {
+                    gridElement.addEventListener('click', (e) => { 
+                        if (e.target.classList.contains('cell')) selectCell(e.target); 
+                    });
+                    
+                    numberPad.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('num-btn') && sudoku_selectedCell) {
+                            const number = parseInt(e.target.dataset.number);
+                            if (number > 0) fillCell(sudoku_selectedCell, number); 
+                            else clearCell(sudoku_selectedCell);
+                        }
+                    });
+                    
+                    document.addEventListener('keydown', (e) => {
+                        if (!sudokuGameView.classList.contains('hidden') && sudoku_selectedCell) {
+                            if (e.key >= '1' && e.key <= '9') fillCell(sudoku_selectedCell, parseInt(e.key));
+                            else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') clearCell(sudoku_selectedCell);
+                        }
+                    });
+                    
+                    newGameBtn.addEventListener('click', generateNewPuzzle);
+                    checkSolutionBtn.addEventListener('click', checkSolution);
+                }
+                
+                function selectCell(cell) {
+                    if (cell.classList.contains('fixed')) return;
+                    if (sudoku_selectedCell) sudoku_selectedCell.classList.remove('selected');
+                    sudoku_selectedCell = cell; 
+                    cell.classList.add('selected');
+                    highlightRelatedCells(cell);
+                }
+                
+                function highlightRelatedCells(cell) {
+                    document.querySelectorAll('#sudoku-game-view .cell').forEach(c => c.classList.remove('highlighted'));
+                    const r = parseInt(cell.dataset.row), c = parseInt(cell.dataset.col), b = parseInt(cell.dataset.block);
+                    document.querySelectorAll('#sudoku-game-view .cell').forEach(c => { 
+                        if (parseInt(c.dataset.row) === r || parseInt(c.dataset.col) === c || parseInt(c.dataset.block) === b) 
+                            c.classList.add('highlighted'); 
+                    });
+                    cell.classList.remove('highlighted');
+                }
+                
+                function fillCell(cell, number) {
+                    if (cell.classList.contains('fixed')) return;
+                    const r = parseInt(cell.dataset.row), c = parseInt(cell.dataset.col);
+                    const isValidMove = sudoku_solution[r][c] === number;
+                    sudoku_board[r][c] = number; 
+                    cell.textContent = number; 
+                    cell.classList.remove('error');
+                    
+                    if (!isValidMove) {
+                        cell.classList.add('error'); 
+                        sudoku_mistakes++; 
+                        mistakesElement.textContent = sudoku_mistakes;
+                        setTimeout(() => cell.classList.remove('error'), 500);
+                    } else if (isBoardFull()) checkSolution();
+                }
+                
+                function clearCell(cell) { 
+                    if (cell.classList.contains('fixed')) return; 
+                    const r = parseInt(cell.dataset.row), c = parseInt(cell.dataset.col); 
+                    sudoku_board[r][c] = 0; 
+                    cell.textContent = ''; 
+                    cell.classList.remove('error'); 
+                }
+                
+                function isBoardFull() { 
+                    return !sudoku_board.flat().includes(0); 
+                }
+                
+                function checkSolution() {
+                    if (!isBoardFull()) { 
+                        showMessage('Puzzle is not complete yet!', 'error'); 
+                        return; 
+                    }
+                    
+                    const isCorrect = sudoku_board.flat().every((val, i) => val === sudoku_solution.flat()[i]);
+                    if (isCorrect) {
+                        showMessage('Congratulations! Puzzle solved correctly!', 'success');
+                        if (sudoku_timerInterval) clearInterval(sudoku_timerInterval);
+                        if (sudoku_selectedCell) sudoku_selectedCell.classList.remove('selected');
+                        sudoku_selectedCell = null;
+                    } else { 
+                        showMessage('There are errors in your solution.', 'error'); 
+                    }
+                }
+                
+                function showMessage(text, type) {
+                    messageElement.textContent = text; 
+                    messageElement.className = `message show ${type}`;
+                    setTimeout(() => messageElement.classList.remove('show'), 3000);
+                }
+                
+                createGrid(); 
+                generateNewPuzzle(); 
+                setupEventListeners();
+            }
+
+            // --- MATH CHALLENGE GAME LOGIC ---
+            let math_currentLevel = 'easy', math_timePerQuestion = 20, math_score = 0, math_currentQuestion = 1;
+            const math_totalQuestions = 10;
+            let math_timeLeft, math_correctAnswer;
+            
+            const math_startScreen = document.getElementById('math-start-screen');
+            const math_gameScreen = document.getElementById('math-game-screen');
+            const math_resultScreen = document.getElementById('math-result-screen');
+            const math_startBtn = document.getElementById('math-start-btn');
+            const math_submitBtn = document.getElementById('math-submit-btn');
+            const math_restartBtn = document.getElementById('math-restart-btn');
+            const math_levelOptions = document.querySelectorAll('#math-game-view .option[data-level]');
+            const math_timeOptions = document.querySelectorAll('#math-game-view .option[data-time]');
+            const math_currentLevelEl = document.getElementById('math-current-level');
+            const math_scoreEl = document.getElementById('math-score');
+            const math_questionCountEl = document.getElementById('math-question-count');
+            const math_questionEl = document.getElementById('math-question');
+            const math_answerInput = document.getElementById('math-answer');
+            const math_timerEl = document.getElementById('math-timer-progress');
+            const math_finalScoreEl = document.getElementById('math-final-score');
+            const math_resultMessageEl = document.getElementById('math-result-message');
+            
+            function initMathGame() {
+                math_startBtn.addEventListener('click', math_startGame);
+                math_submitBtn.addEventListener('click', math_checkAnswer);
+                math_restartBtn.addEventListener('click', math_resetGame);
+                math_answerInput.addEventListener('keypress', function(e) { 
+                    if (e.key === 'Enter') math_checkAnswer(); 
+                });
+                
+                math_levelOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        math_levelOptions.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected'); 
+                        math_currentLevel = option.getAttribute('data-level');
+                    });
+                });
+                
+                math_timeOptions.forEach(option => {
+                    option.addEventListener('click', () => {
+                        math_timeOptions.forEach(opt => opt.classList.remove('selected'));
+                        option.classList.add('selected'); 
+                        math_timePerQuestion = parseInt(option.getAttribute('data-time'));
+                    });
+                });
+                
+                math_levelOptions[0].classList.add('selected'); 
+                math_timeOptions[1].classList.add('selected');
+            }
+            
+            function math_startGame() {
+                math_score = 0; 
+                math_currentQuestion = 1;
+                math_startScreen.classList.remove('active'); 
+                math_gameScreen.classList.add('active'); 
+                math_resultScreen.classList.remove('active');
+                math_currentLevelEl.textContent = math_currentLevel.charAt(0).toUpperCase() + math_currentLevel.slice(1);
+                math_scoreEl.textContent = math_score;
+                math_questionCountEl.textContent = `${math_currentQuestion}/${math_totalQuestions}`;
+                math_generateQuestion(); 
+                math_startTimer();
+                math_answerInput.focus();
+            }
+            
+            function math_generateQuestion() {
+                let num1, num2, operator;
+                switch(math_currentLevel) {
+                    case 'easy':
+                        num1 = Math.floor(Math.random() * 10) + 1; 
+                        num2 = Math.floor(Math.random() * 10) + 1;
+                        operator = ['+', '-'][Math.floor(Math.random() * 2)];
+                        if (operator === '-' && num1 < num2) [num1, num2] = [num2, num1];
+                        break;
+                    case 'medium':
+                        num1 = Math.floor(Math.random() * 50) + 1; 
+                        num2 = Math.floor(Math.random() * 20) + 1;
+                        operator = ['+', '-', '×'][Math.floor(Math.random() * 3)];
+                        if (operator === '-' && num1 < num2) [num1, num2] = [num2, num1];
+                        break;
+                    case 'hard':
+                        num1 = Math.floor(Math.random() * 100) + 1; 
+                        num2 = Math.floor(Math.random() * 100) + 1;
+                        operator = ['+', '-', '×', '÷'][Math.floor(Math.random() * 4)];
+                        if (operator === '-' && num1 < num2) [num1, num2] = [num2, num1];
+                        break;
+                }
+                
+                if (operator === '÷') {
+                    const result = Math.floor(Math.random() * 10) + 2; 
+                    num2 = Math.floor(Math.random() * 10) + 2;
+                    num1 = num2 * result;
+                }
+                
+                switch(operator) {
+                    case '+': math_correctAnswer = num1 + num2; break;
+                    case '-': math_correctAnswer = num1 - num2; break;
+                    case '×': math_correctAnswer = num1 * num2; break;
+                    case '÷': math_correctAnswer = num1 / num2; break;
+                }
+                
+                math_questionEl.textContent = `${num1} ${operator} ${num2} = ?`;
+                math_answerInput.value = '';
+            }
+            
+            function math_startTimer() {
+                math_timeLeft = math_timePerQuestion;
+                math_timerEl.style.transition = 'none'; 
+                math_timerEl.style.width = '100%';
+                void math_timerEl.offsetWidth; 
+                math_timerEl.style.transition = `width ${math_timePerQuestion}s linear`;
+                math_timerEl.style.width = '0%';
+                math_timer = setTimeout(() => { math_nextQuestion(); }, math_timePerQuestion * 1000);
+            }
+            
+            function math_checkAnswer() {
+                if (math_answerInput.value === '') return;
+                clearTimeout(math_timer);
+                const userAnswer = parseInt(math_answerInput.value);
+                
+                if (userAnswer === math_correctAnswer) {
+                    math_score++; 
+                    math_scoreEl.textContent = math_score;
+                    math_answerInput.style.borderColor = '#2ecc71'; 
+                    math_answerInput.style.backgroundColor = 'rgba(46, 204, 113, 0.1)';
+                } else {
+                    math_answerInput.style.borderColor = '#e74c3c'; 
+                    math_answerInput.style.backgroundColor = 'rgba(231, 76, 60, 0.1)';
+                }
+                
+                setTimeout(() => { math_nextQuestion(); }, 800);
+            }
+            
+            function math_nextQuestion() {
+                math_currentQuestion++;
+                if (math_currentQuestion <= math_totalQuestions) {
+                    math_questionCountEl.textContent = `${math_currentQuestion}/${math_totalQuestions}`;
+                    math_answerInput.style.borderColor = '#3498db'; 
+                    math_answerInput.style.backgroundColor = 'white';
+                    math_generateQuestion(); 
+                    math_startTimer();
+                    math_answerInput.focus();
+                } else { 
+                    math_endGame(); 
+                }
+            }
+            
+            function math_endGame() {
+                math_gameScreen.classList.remove('active'); 
+                math_resultScreen.classList.add('active');
+                math_finalScoreEl.textContent = `${math_score}/${math_totalQuestions}`;
+                
+                if (math_score >= 9) { 
+                    math_resultMessageEl.textContent = "Outstanding! You're a math genius!"; 
+                } else if (math_score >= 7) { 
+                    math_resultMessageEl.textContent = "Great job! You're really good at this!"; 
+                } else if (math_score >= 5) { 
+                    math_resultMessageEl.textContent = "Good effort! Keep practicing!"; 
+                } else { 
+                    math_resultMessageEl.textContent = "Nice try! Practice makes perfect!"; 
+                }
+            }
+            
+            function math_resetGame() {
+                clearTimeout(math_timer);
+                math_resultScreen.classList.remove('active'); 
+                math_gameScreen.classList.remove('active'); 
+                math_startScreen.classList.add('active');
+                math_levelOptions.forEach(opt => opt.classList.remove('selected'));
+                math_timeOptions.forEach(opt => opt.classList.remove('selected'));
+                math_levelOptions[0].classList.add('selected'); 
+                math_timeOptions[1].classList.add('selected');
+                math_currentLevel = 'easy'; 
+                math_timePerQuestion = 20;
+            }
+
+            // --- AGE CALCULATOR LOGIC ---
+            function initAgeCalculator() {
+                const birthDateInput = document.getElementById('birthdate');
+                const calculateBtn = document.getElementById('calculateBtn');
+                const resultContainer = document.getElementById('result');
+                const yearsSpan = document.getElementById('years');
+                const monthsSpan = document.getElementById('months');
+                const daysSpan = document.getElementById('days');
+
+                calculateBtn.addEventListener('click', () => {
+                    const birthDateString = birthDateInput.value;
+
+                    if (!birthDateString) {
+                        alert("कृपया अपनी जन्म-तिथि चुनें।");
+                        return;
+                    }
+
+                    const birthDate = new Date(birthDateString);
+                    const today = new Date();
+
+                    if (birthDate > today) {
+                        alert("जन्म-तिथि भविष्य की नहीं हो सकती। कृपया सही तारीख चुनें।");
+                        return;
+                    }
+                    
+                    let ageYears = today.getFullYear() - birthDate.getFullYear();
+                    let ageMonths = today.getMonth() - birthDate.getMonth();
+                    let ageDays = today.getDate() - birthDate.getDate();
+
+                    if (ageDays < 0) {
+                        ageMonths--;
+                        const daysInLastMonth = new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+                        ageDays += daysInLastMonth;
+                    }
+                    
+                    if (ageMonths < 0) {
+                        ageYears--;
+                        ageMonths += 12;
+                    }
+                    
+                    resultContainer.style.display = 'none';
+                    void resultContainer.offsetWidth; 
+                    resultContainer.style.display = 'flex';
+
+                    animateValue(yearsSpan, 0, ageYears, 800);
+                    animateValue(monthsSpan, 0, ageMonths, 1000);
+                    animateValue(daysSpan, 0, ageDays, 1200);
+                });
+
+                function animateValue(element, start, end, duration) {
+                    let startTimestamp = null;
+                    const step = (timestamp) => {
+                        if (!startTimestamp) startTimestamp = timestamp;
+                        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                        element.innerText = Math.floor(progress * (end - start) + start);
+                        if (progress < 1) {
+                            window.requestAnimationFrame(step);
+                        } else {
+                            element.innerText = end;
+                        }
+                    };
+                    window.requestAnimationFrame(step);
+                }
+            }
+            
+            // --- CALCULATOR GAME LOGIC ---
+            function initCalculator() {
+                const display = document.querySelector('#calculator-view .display');
+                const buttons = document.querySelectorAll('#calculator-view .buttons button');
+
+                buttons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const buttonValue = button.dataset.value;
+
+                        if (buttonValue === '=') {
+                            try {
+                                const result = eval(display.value.replace(/%/g, '/100'));
+                                display.value = parseFloat(result.toFixed(10));
+                            } catch (error) {
+                                display.value = 'Error';
+                                setTimeout(() => { display.value = ''; }, 1500);
+                            }
+                        } else if (buttonValue === 'C') {
+                            display.value = '';
+                        } else if (buttonValue === 'DEL') {
+                            display.value = display.value.slice(0, -1);
+                        } else {
+                            if (display.value === 'Error') display.value = '';
+                            display.value += buttonValue;
+                        }
+
+                        display.style.animation = 'none';
+                        display.offsetHeight; /* Trigger reflow */
+                        display.style.animation = 'text-fade-in 0.3s ease';
+                    });
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (calculatorView.classList.contains('hidden')) return; 
+                    const key = event.key;
+                    const validKeys = '0123456789./*-+';
+
+                    if (validKeys.includes(key)) {
+                        event.preventDefault();
+                        if (display.value === 'Error') display.value = '';
+                        display.value += key;
+                    } else if (key === 'Enter' || key === '=') {
+                        event.preventDefault();
+                        document.querySelector('#calculator-view .equal').click();
+                    } else if (key === 'Backspace') {
+                        event.preventDefault();
+                        document.querySelector('#calculator-view [data-value="DEL"]').click();
+                    } else if (key === 'Escape' || key.toLowerCase() === 'c') {
+                        event.preventDefault();
+                        document.querySelector('#calculator-view .clear').click();
+                    }
+                });
+            }
+
+            // --- CHESS GAME LOGIC ---
+            function initChessGame() {
+                // --- CONSTANTS ---
+                const PIECES = {
+                    'wp': '♙', 'wr': '♖', 'wn': '♘', 'wb': '♗', 'wq': '♕', 'wk': '♔',
+                    'bp': '♟', 'br': '♜', 'bn': '♞', 'bb': '♝', 'bq': '♛', 'bk': '♚'
+                };
+                const PIECE_VALUES = { 'p': 100, 'n': 320, 'b': 330, 'r': 500, 'q': 900, 'k': 20000 };
+                const PST = {
+                    'p': [[0,0,0,0,0,0,0,0],[50,50,50,50,50,50,50,50],[10,10,20,30,30,20,10,10],[5,5,10,25,25,10,5,5],[0,0,0,20,20,0,0,0],[5,-5,-10,0,0,-10,-5,5],[5,10,10,-20,-20,10,10,5],[0,0,0,0,0,0,0,0]],
+                    'n': [[-50,-40,-30,-30,-30,-30,-40,-50],[-40,-20,0,0,0,0,-20,-40],[-30,0,10,15,15,10,0,-30],[-30,5,15,20,20,15,5,-30],[-30,0,15,20,20,15,0,-30],[-30,5,10,15,15,10,5,-30],[-40,-20,0,5,5,0,-20,-40],[-50,-40,-30,-30,-30,-30,-40,-50]],
+                    'b': [[-20,-10,-10,-10,-10,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,10,10,5,0,-10],[-10,5,5,10,10,5,5,-10],[-10,0,10,10,10,10,0,-10],[-10,10,10,10,10,10,10,-10],[-10,5,0,0,0,0,5,-10],[-20,-10,-10,-10,-10,-10,-10,-20]],
+                    'r': [[0,0,0,0,0,0,0,0],[5,10,10,10,10,10,10,5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[-5,0,0,0,0,0,0,-5],[0,0,0,5,5,0,0,0]],
+                    'q': [[-20,-10,-10,-5,-5,-10,-10,-20],[-10,0,0,0,0,0,0,-10],[-10,0,5,5,5,5,0,-10],[-5,0,5,5,5,5,0,-5],[0,0,5,5,5,5,0,-5],[-10,5,5,5,5,5,0,-10],[-10,0,5,0,0,0,0,-10],[-20,-10,-10,-5,-5,-10,-10,-20]],
+                    'k': [[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-30,-40,-40,-50,-50,-40,-40,-30],[-20,-30,-30,-40,-40,-30,-30,-20],[-10,-20,-20,-20,-20,-20,-20,-10],[20,20,0,0,0,0,20,20],[20,30,10,0,0,10,30,20]]
+                };
+
+                // --- GAME STATE ---
+                let boardState, selectedPiece, legalMoves, currentPlayer, gameHistory, gameOver, castlingRights, enPassantTarget, boardFlipped;
+                let moveSound, captureSound;
+
+                // --- DOM ELEMENTS ---
+                const chessView = document.getElementById('chess-game-view');
+                const chessboard = chessView.querySelector('#chessboard');
+                const movesList = chessView.querySelector('#moves-list');
+                const gameStatus = chessView.querySelector('#game-status');
+                const aiThinking = chessView.querySelector('#ai-thinking');
+                const newGameBtn = chessView.querySelector('#chess-new-game');
+                const undoBtn = chessView.querySelector('#chess-undo-move');
+                const flipBtn = chessView.querySelector('#chess-flip-board');
+                const resignBtn = chessView.querySelector('#chess-resign');
+
+                function initGame() {
+                    createBoard();
+                    setupEventListeners();
+                    initSounds();
+                    startNewGame();
+                }
+
+                function createBoard() {
+                    chessboard.innerHTML = '';
+                    for (let row = 0; row < 8; row++) {
+                        for (let col = 0; col < 8; col++) {
+                            const square = document.createElement('div');
+                            square.classList.add('square', (row + col) % 2 === 0 ? 'light' : 'dark');
+                            square.dataset.row = row;
+                            square.dataset.col = col;
+                            chessboard.appendChild(square);
+                        }
+                    }
+                }
+
+                function setupEventListeners() {
+                    chessboard.addEventListener('click', handleSquareClick);
+                    newGameBtn.addEventListener('click', startNewGame);
+                    undoBtn.addEventListener('click', undoMove);
+                    flipBtn.addEventListener('click', flipBoard);
+                    resignBtn.addEventListener('click', resignGame);
+                }
+
+                function initSounds() {
+                    moveSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+                    moveSound.volume = 0.3;
+                    captureSound = new Audio("data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb2VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV");
+                    captureSound.volume = 0.5;
+                }
+
+                function startNewGame() {
+                    boardState = [
+                        ['br', 'bn', 'bb', 'bq', 'bk', 'bb', 'bn', 'br'],
+                        ['bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp', 'bp'],
+                        ['', '', '', '', '', '', '', ''],
+                        ['', '', '', '', '', '', '', ''],
+                        ['', '', '', '', '', '', '', ''],
+                        ['', '', '', '', '', '', '', ''],
+                        ['wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp', 'wp'],
+                        ['wr', 'wn', 'wb', 'wq', 'wk', 'wb', 'wn', 'wr']
+                    ];
+                    currentPlayer = 'w'; selectedPiece = null; legalMoves = []; gameHistory = []; gameOver = false;
+                    castlingRights = { w: { k: true, q: true }, b: { k: true, q: true } };
+                    enPassantTarget = null;
+                    if (boardFlipped) flipBoard(); // Unflip if flipped
+                    
+                    updateGameStatus("Your turn"); updateBoard(); updateMoveHistory();
+                    undoBtn.disabled = true; resignBtn.disabled = false;
+                }
+
+                function updateBoard() {
+                    chessView.querySelectorAll('.square').forEach(sq => {
+                        sq.classList.remove('highlighted', 'possible-move', 'possible-capture', 'in-check');
+                        const pieceEl = sq.querySelector('.piece');
+                        if (pieceEl) pieceEl.remove();
+
+                        const row = parseInt(sq.dataset.row); const col = parseInt(sq.dataset.col);
+                        const piece = boardState[row][col];
+                        
+                        if (piece) {
+                            const pieceElement = document.createElement('div');
+                            pieceElement.classList.add('piece');
+                            pieceElement.textContent = PIECES[piece];
+                            pieceElement.dataset.piece = piece;
+                            sq.appendChild(pieceElement);
+                        }
+                    });
+
+                    if (selectedPiece) {
+                        const [row, col] = selectedPiece;
+                        const square = chessView.querySelector(`.square[data-row="${row}"][data-col="${col}"]`);
+                        if(square) square.classList.add('highlighted');
+                        
+                        legalMoves.forEach(({ to: [r, c] }) => {
+                            const targetSquare = chessView.querySelector(`.square[data-row="${r}"][data-col="${c}"]`);
+                            if(targetSquare) targetSquare.classList.add(boardState[r][c] ? 'possible-capture' : 'possible-move');
+                        });
+                    }
+                    highlightCheck();
+                }
+                
+                function highlightCheck() {
+                    ['w', 'b'].forEach(color => {
+                        if (isKingInCheck(color, boardState)) {
+                            const kingPos = findKing(color, boardState);
+                            if(kingPos) {
+                                const [r, c] = kingPos;
+                                chessView.querySelector(`.square[data-row="${r}"][data-col="${c}"]`).classList.add('in-check');
+                            }
+                        }
+                    });
+                }
+
+                function updateGameStatus(status) {
+                    gameStatus.textContent = status;
+                    gameStatus.style.animation = 'none';
+                    setTimeout(() => { gameStatus.style.animation = 'pulse 0.5s ease'; }, 10);
+                }
+
+                function updateMoveHistory() {
+                    movesList.innerHTML = '';
+                    for (let i = 0; i < gameHistory.length; i += 2) {
+                        const whiteMove = gameHistory[i];
+                        const blackMove = gameHistory[i + 1];
+                        const moveNumber = document.createElement('span');
+                        moveNumber.classList.add('move-number');
+                        moveNumber.textContent = `${Math.floor(i / 2) + 1}.`;
+                        movesList.appendChild(moveNumber);
+                        const whiteMoveSpan = document.createElement('span');
+                        whiteMoveSpan.classList.add('move-white');
+                        whiteMoveSpan.textContent = formatMove(whiteMove);
+                        movesList.appendChild(whiteMoveSpan);
+                        if (blackMove) {
+                            const blackMoveSpan = document.createElement('span');
+                            blackMoveSpan.classList.add('move-black');
+                            blackMoveSpan.textContent = formatMove(blackMove);
+                            movesList.appendChild(blackMoveSpan);
+                        }
+                    }
+                    movesList.parentElement.scrollTop = movesList.parentElement.scrollHeight;
+                }
+
+                function formatMove({ from, to, piece, captured, promotion, isCastle }) {
+                    if (isCastle === 'k') return 'O-O'; if (isCastle === 'q') return 'O-O-O';
+                    const pieceType = piece[1]; const toCol = String.fromCharCode(97 + to[1]);
+                    const toRow = 8 - to[0];
+                    let notation = (pieceType !== 'p') ? pieceType.toUpperCase() : '';
+                    if (captured) {
+                        if (pieceType === 'p') notation += String.fromCharCode(97 + from[1]);
+                        notation += 'x';
+                    }
+                    notation += `${toCol}${toRow}`;
+                    if (promotion) notation += `=${promotion.toUpperCase()}`;
+                    return notation;
+                }
+
+                function handleSquareClick(e) {
+                    if (gameOver || currentPlayer === 'b') return;
+                    const square = e.target.closest('.square');
+                    if (!square) return;
+                    const row = parseInt(square.dataset.row); const col = parseInt(square.dataset.col);
+                    if (selectedPiece) {
+                        const move = legalMoves.find(({ to }) => to[0] === row && to[1] === col);
+                        if (move) {
+                            makeMove(move);
+                        } else {
+                            selectedPiece = null; legalMoves = [];
+                            const piece = boardState[row][col];
+                            if (piece && piece[0] === currentPlayer) selectPiece(row, col);
+                        }
+                    } else {
+                        const piece = boardState[row][col];
+                        if (piece && piece[0] === currentPlayer) selectPiece(row, col);
+                    }
+                    updateBoard();
+                }
+                
+                function selectPiece(row, col) {
+                    selectedPiece = [row, col];
+                    legalMoves = generateLegalMovesForPiece(row, col, boardState, currentPlayer, castlingRights, enPassantTarget);
+                }
+
+                function makeMove(move, isUndo = false) {
+                    const { from, to, piece } = move;
+                    const [fromRow, fromCol] = from; const [toRow, toCol] = to;
+                    const capturedPiece = boardState[toRow][toCol];
+                    const oldCastlingRights = JSON.parse(JSON.stringify(castlingRights));
+                    const oldEnPassantTarget = enPassantTarget;
+                    let enPassantCapture = false;
+                    if (piece[1] === 'p' && to.toString() === enPassantTarget?.toString()) {
+                        boardState[currentPlayer === 'w' ? toRow + 1 : toRow - 1][toCol] = '';
+                        enPassantCapture = true;
+                    }
+                    boardState[toRow][toCol] = boardState[fromRow][fromCol]; boardState[fromRow][fromCol] = '';
+                    if (piece[1] === 'k' && Math.abs(fromCol - toCol) === 2) {
+                        if (toCol === 6) { boardState[toRow][5] = boardState[toRow][7]; boardState[toRow][7] = ''; } 
+                        else { boardState[toRow][3] = boardState[toRow][0]; boardState[toRow][0] = ''; }
+                        move.isCastle = toCol === 6 ? 'k' : 'q';
+                    }
+                    enPassantTarget = (piece[1] === 'p' && Math.abs(fromRow - toRow) === 2) ? [ (fromRow + toRow) / 2, fromCol ] : null;
+                    if (piece === 'wk') castlingRights.w = {k:false,q:false}; if (piece === 'bk') castlingRights.b = {k:false,q:false};
+                    if (piece === 'wr') { if (fromCol === 7) castlingRights.w.k = false; if (fromCol === 0) castlingRights.w.q = false; }
+                    if (piece === 'br') { if (fromCol === 7) castlingRights.b.k = false; if (fromCol === 0) castlingRights.b.q = false; }
+                    if (piece[1] === 'p' && (toRow === 0 || toRow === 7)) {
+                        let promotedPiece = 'q';
+                        if (currentPlayer === 'w' && !isUndo) promotedPiece = prompt("Promote to (q, r, b, n)?", "q")?.toLowerCase() || 'q';
+                        boardState[toRow][toCol] = currentPlayer + promotedPiece; move.promotion = promotedPiece;
+                    }
+                    if (!isUndo) {
+                        gameHistory.push({ ...move, captured: capturedPiece || (enPassantCapture ? `${currentPlayer === 'w' ? 'b' : 'w'}p` : null), castlingRights: oldCastlingRights, enPassantTarget: oldEnPassantTarget });
+                        (capturedPiece || enPassantCapture) ? captureSound.play() : moveSound.play();
+                        selectedPiece = null; legalMoves = []; updateBoard(); updateMoveHistory();
+                        const nextPlayer = currentPlayer === 'w' ? 'b' : 'w';
+                        if (checkGameOver(nextPlayer)) { resignBtn.disabled = true; return; }
+                        currentPlayer = nextPlayer; undoBtn.disabled = currentPlayer === 'b';
+                        if (currentPlayer === 'b') {
+                            updateGameStatus("AI is thinking..."); aiThinking.classList.add('visible');
+                            chess_aiTimeoutId = setTimeout(makeAIMove, 500);
+                        } else {
+                            updateGameStatus("Your turn");
+                        }
+                    }
+                }
+                
+                function checkGameOver(player) {
+                    if (generateAllLegalMoves(player, boardState, castlingRights, enPassantTarget).length === 0) {
+                        gameOver = true;
+                        if (isKingInCheck(player, boardState)) updateGameStatus(`Checkmate! ${player === 'w' ? 'Black' : 'White'} wins.`);
+                        else updateGameStatus("Stalemate! It's a draw.");
+                        return true;
+                    }
+                    return false;
+                }
+                
+                function isSquareAttacked(row, col, attackerColor, board) {
+                    for (let r = 0; r < 8; r++) {
+                        for (let c = 0; c < 8; c++) {
+                            const piece = board[r][c];
+                            if (piece && piece[0] === attackerColor) {
+                                if (generatePseudoLegalMoves(r, c, board).some(([tr, tc]) => tr === row && tc === col)) return true;
+                            }
+                        }
+                    }
+                    return false;
+                }
+
+                function findKing(color, board) {
+                    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c] === color + 'k') return [r, c];
+                    return null;
+                }
+                
+                function isKingInCheck(kingColor, board) {
+                    const kingPos = findKing(kingColor, board);
+                    return kingPos ? isSquareAttacked(kingPos[0], kingPos[1], kingColor === 'w' ? 'b' : 'w', board) : false;
+                }
+
+                function generateLegalMovesForPiece(row, col, board, color, currentCastling, currentEnPassant) {
+                    const piece = board[row][col];
+                    if (!piece || piece[0] !== color) return [];
+                    const pseudoMoves = generatePseudoLegalMoves(row, col, board, currentCastling, currentEnPassant);
+                    const legalMovesList = [];
+                    for (const to of pseudoMoves) {
+                        const tempBoard = JSON.parse(JSON.stringify(board));
+                        tempBoard[to[0]][to[1]] = tempBoard[row][col]; tempBoard[row][col] = '';
+                        if (piece[1] === 'p' && to.toString() === currentEnPassant?.toString()) tempBoard[row][to[1]] = '';
+                        if (!isKingInCheck(color, tempBoard)) legalMovesList.push({ from: [row, col], to, piece });
+                    }
+                    return legalMovesList;
+                }
+                
+                function generateAllLegalMoves(color, board, currentCastling, currentEnPassant) {
+                    let allMoves = [];
+                    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                        if (board[r][c] && board[r][c][0] === color) {
+                            allMoves.push(...generateLegalMovesForPiece(r, c, board, color, currentCastling, currentEnPassant));
+                        }
+                    }
+                    return allMoves;
+                }
+
+                function generatePseudoLegalMoves(row, col, board, currentCastling, currentEnPassant) {
+                    const piece = board[row][col]; const color = piece[0]; const type = piece[1]; const moves = [];
+                    const addLineMoves = (dirs) => {
+                        for (const [dr, dc] of dirs) {
+                            let r = row + dr, c = col + dc;
+                            while (r >= 0 && r < 8 && c >= 0 && c < 8) {
+                                const targetPiece = board[r][c];
+                                if (targetPiece) { if (targetPiece[0] !== color) moves.push([r, c]); break; }
+                                moves.push([r, c]); r += dr; c += dc;
+                            }
+                        }
+                    };
+                    switch(type) {
+                        case 'p':
+                            const dir = color === 'w' ? -1 : 1;
+                            if (!board[row + dir][col]) {
+                                moves.push([row + dir, col]);
+                                if (((color === 'w' && row === 6) || (color === 'b' && row === 1)) && !board[row + 2 * dir][col]) moves.push([row + 2 * dir, col]);
+                            }
+                            for (const dc of [-1, 1]) {
+                                if (col + dc >= 0 && col + dc < 8) {
+                                    const target = board[row + dir][col + dc];
+                                    if (target && target[0] !== color) moves.push([row + dir, col + dc]);
+                                    if (currentEnPassant && (row + dir) === currentEnPassant[0] && (col + dc) === currentEnPassant[1]) moves.push([row + dir, col + dc]);
+                                }
+                            }
+                            break;
+                        case 'n': [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr, dc]) => { const r = row + dr, c = col + dc; if (r >= 0 && r < 8 && c >= 0 && c < 8) { const target = board[r][c]; if (!target || target[0] !== color) moves.push([r, c]); } }); break;
+                        case 'b': addLineMoves([[-1,-1],[-1,1],[1,-1],[1,1]]); break;
+                        case 'r': addLineMoves([[-1,0],[1,0],[0,-1],[0,1]]); break;
+                        case 'q': addLineMoves([[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]]); break;
+                        case 'k':
+                            [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]].forEach(([dr, dc]) => { const r = row + dr, c = col + dc; if (r >= 0 && r < 8 && c >= 0 && c < 8) { const target = board[r][c]; if (!target || target[0] !== color) moves.push([r, c]); } });
+                            const op = color === 'w' ? 'b' : 'w';
+                            if (currentCastling?.[color]?.k && !board[row][5] && !board[row][6] && !isSquareAttacked(row, 4, op, board) && !isSquareAttacked(row, 5, op, board) && !isSquareAttacked(row, 6, op, board)) moves.push([row, 6]);
+                            if (currentCastling?.[color]?.q && !board[row][1] && !board[row][2] && !board[row][3] && !isSquareAttacked(row, 4, op, board) && !isSquareAttacked(row, 3, op, board) && !isSquareAttacked(row, 2, op, board)) moves.push([row, 2]);
+                            break;
+                    }
+                    return moves;
+                }
+                
+                function makeAIMove() {
+                    const bestMove = findBestMove(3); 
+                    if (bestMove) makeMove(bestMove);
+                    aiThinking.classList.remove('visible');
+                    chess_aiTimeoutId = null; // Clear timeout ID after it runs
+                }
+
+                function findBestMove(depth) {
+                    let bestScore = -Infinity; let bestMove = null;
+                    const moves = generateAllLegalMoves('b', boardState, castlingRights, enPassantTarget);
+                    if (moves.length === 0) return null;
+                    for (const move of moves) {
+                        const tempBoard = JSON.parse(JSON.stringify(boardState));
+                        tempBoard[move.to[0]][move.to[1]] = tempBoard[move.from[0]][move.from[1]]; tempBoard[move.from[0]][move.from[1]] = '';
+                        const score = minimax(tempBoard, depth - 1, -Infinity, Infinity, false);
+                        if (score > bestScore) { bestScore = score; bestMove = move; }
+                    }
+                    return bestMove || moves[Math.floor(Math.random() * moves.length)];
+                }
+
+                function minimax(board, depth, alpha, beta, isMaximizing) {
+                    if (depth === 0) return evaluateBoard(board);
+                    const color = isMaximizing ? 'b' : 'w';
+                    const moves = generateAllLegalMoves(color, board, {}, null);
+                    if (moves.length === 0) return isKingInCheck(color, board) ? (isMaximizing ? -100000 : 100000) : 0;
+                    if (isMaximizing) {
+                        let maxEval = -Infinity;
+                        for (const move of moves) {
+                            const tempBoard = JSON.parse(JSON.stringify(board));
+                            tempBoard[move.to[0]][move.to[1]] = tempBoard[move.from[0]][move.from[1]]; tempBoard[move.from[0]][move.from[1]] = '';
+                            const evalScore = minimax(tempBoard, depth - 1, alpha, beta, false);
+                            maxEval = Math.max(maxEval, evalScore); alpha = Math.max(alpha, evalScore);
+                            if (beta <= alpha) break;
+                        }
+                        return maxEval;
+                    } else {
+                        let minEval = Infinity;
+                        for (const move of moves) {
+                            const tempBoard = JSON.parse(JSON.stringify(board));
+                            tempBoard[move.to[0]][move.to[1]] = tempBoard[move.from[0]][move.from[1]]; tempBoard[move.from[0]][move.from[1]] = '';
+                            const evalScore = minimax(tempBoard, depth - 1, alpha, beta, true);
+                            minEval = Math.min(minEval, evalScore); beta = Math.min(beta, evalScore);
+                            if (beta <= alpha) break;
+                        }
+                        return minEval;
+                    }
+                }
+
+                function evaluateBoard(board) {
+                    let totalScore = 0;
+                    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+                        const piece = board[r][c];
+                        if (piece) {
+                            const value = PIECE_VALUES[piece[1]];
+                            const posValue = piece[0] === 'w' ? PST[piece[1]][r][c] : PST[piece[1]][7 - r][c];
+                            totalScore += (piece[0] === 'w' ? -1 : 1) * (value + posValue);
+                        }
+                    }
+                    return totalScore;
+                }
+
+                function undoMove() {
+                    if (gameHistory.length < 2 || currentPlayer === 'b' || gameOver) return;
+                    // Undo twice: player's move then AI's move
+                    for(let i=0; i<2; i++) {
+                        const lastHistory = gameHistory.pop();
+                        if (lastHistory) {
+                            boardState[lastHistory.from[0]][lastHistory.from[1]] = lastHistory.piece;
+                            boardState[lastHistory.to[0]][lastHistory.to[1]] = lastHistory.captured || '';
+                            // Restore special move states only from player's move history
+                            if (i === 1) {
+                                castlingRights = lastHistory.castlingRights;
+                                enPassantTarget = lastHistory.enPassantTarget;
+                            }
+                        }
+                    }
+                    currentPlayer = 'w'; gameOver = false; selectedPiece = null; legalMoves = [];
+                    updateBoard(); updateMoveHistory(); updateGameStatus('Your turn');
+                    resignBtn.disabled = false;
+                    if (gameHistory.length === 0) undoBtn.disabled = true;
+                }
+
+                function flipBoard() {
+                    boardFlipped = !boardFlipped;
+                    chessboard.style.transition = 'transform 0.5s';
+                    chessboard.style.transform = boardFlipped ? 'rotate(180deg)' : 'rotate(0deg)';
+                    chessView.querySelectorAll('.piece').forEach(el => {
+                        el.style.transition = 'transform 0.5s';
+                        el.style.transform = boardFlipped ? 'rotate(180deg)' : 'rotate(0deg)';
+                    });
+                }
+
+                function resignGame() {
+                    if (gameOver) return;
+                    gameOver = true; resignBtn.disabled = true; undoBtn.disabled = true;
+                    updateGameStatus('You resigned. AI wins!');
+                }
+
+                initGame();
+            }
+
+        });
+    </script>
+</body>
+</html>
